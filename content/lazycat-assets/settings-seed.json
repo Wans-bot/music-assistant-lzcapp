@@ -1,0 +1,19 @@
+{
+  "onboard_done": true,
+  "providers": {
+    "filesystem_local--lzcmedia": {
+      "values": {},
+      "type": "music",
+      "domain": "filesystem_local",
+      "instance_id": "filesystem_local--lzcmedia",
+      "enabled": true,
+      "name": null,
+      "default_name": "Filesystem (local disk) [media]",
+      "last_error": null,
+      "setup_data": {
+        "content_type": "music",
+        "path": "/media"
+      }
+    }
+  }
+}

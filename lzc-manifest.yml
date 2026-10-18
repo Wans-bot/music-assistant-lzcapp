@@ -1,0 +1,136 @@
+# Music Assistant 音乐中枢 · 懒猫 LPK V2 运行清单
+#
+# 设计要点：
+# 1. 服务用宿主网络（network_mode: host）：MA 的播放端发现（mDNS/uPnP）与向
+#    AirPlay/Chromecast/DLNA/Sonos 等设备推流都要求与音箱处于同一二层网络，
+#    桥接网络下官方明确"不支持"。routes 通过 host.lzcapp 回到宿主网络服务。
+# 2. 免密：browser 注入（ma-autologin.js）首次安装自动建号（POST /setup），
+#    日常登录页自动登录（POST /auth/login），登出后再打开不需要手输密码；
+#    右下角提供「切换账号」控件（真登出 + 停用自动登录），登录页可「一键登录」恢复。
+# 3. 缓存修正：上游 index.html 带 ETag/Last-Modified，客户端一旦缓存过旧页面
+#    （未注入版本）会走 304 复用旧副本导致注入失效；这里在 request 阶段去掉
+#    条件请求头、response 阶段对 HTML 输出 no-store，保证注入每次都送达。
+application:
+  subdomain: musicassistant
+  routes:
+    - /=http://host.lzcapp:8095
+  health_check:
+    test_url: http://host.lzcapp:8095/info
+    start_period: 300s
+    timeout: 10s
+  injects:
+    # ── 免密登录 / 首次初始化（browser 阶段）────────────────────────────
+    - id: ma-login-autofill
+      auth_required: false
+      when:
+        - /
+        - /setup
+        - /login
+      do:
+        - src: file:///lzcapp/pkg/content/lazycat-injects/ma-autologin.js
+          params:
+            user: admin
+            password: MaLzc-8Qx4Rz
+    # ── HTML 缓存修正：request 阶段去掉条件请求头，强制上游回新页面 ──────
+    - id: ma-strip-conditional-headers
+      on: request
+      auth_required: false
+      when:
+        - /*
+      do: |
+        var accept = String(ctx.headers.get("Accept") || "");
+        if (accept.indexOf("text/html") < 0) return;
+        ctx.headers.del("If-None-Match");
+        ctx.headers.del("If-Modified-Since");
+    # ── HTML 缓存修正 + 默认中文：response 阶段对 HTML 输出 no-store、去掉 ETag，
+    #    并在 <head> 注入「未设置过语言时默认 zh-CN」的小脚本（在应用脚本之前执行，
+    #    用户之后在设置里仍可自行切换）──────────────────────────────────────────
+    - id: ma-html-no-store
+      on: response
+      auth_required: false
+      when:
+        - /*
+      do: |
+        if (ctx.status !== 200) return;
+        var ct = String(ctx.headers.get("Content-Type") || "");
+        if (ct.indexOf("text/html") < 0) return;
+        ctx.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
+        ctx.headers.del("ETag");
+        ctx.headers.del("Last-Modified");
+        try {
+          var html = ctx.body.getText();
+          if (html.indexOf('data-lzc-ma-lang-default') < 0 && html.indexOf("<head>") >= 0) {
+            var langScript = '<script data-lzc-ma-lang-default>(function(){try{if(!localStorage.getItem("frontend.settings.language")){localStorage.setItem("frontend.settings.language","zh-CN");}}catch(e){}})();</script>';
+            ctx.body.set(html.replace("<head>", "<head>" + langScript), { content_type: ct });
+          }
+        } catch (e) {}
+
+services:
+  # ── Music Assistant 服务端（单容器；数据在 /data；官方镜像中转）────────
+  music-assistant:
+    image: registry.lazycat.cloud/wans/music-assistant/server:cf9ebd30fcec0dd5
+    network_mode: host
+    environment:
+      TZ: Asia/Shanghai
+      # 自动入库助手 lzc-sync-agent.py 用的凭据与间隔：与浏览器免密注入同一账号
+      LZC_MA_USER: admin
+      LZC_MA_PASS: MaLzc-8Qx4Rz
+      LZC_MA_SYNC_INTERVAL: '300'
+    # 平台按 document.private 权限把「应用文稿」挂到 /lzcapp/documents/<uid>；镜像自带一个空的
+    # /media 目录（MA 默认音乐库路径），setup_script 把它换成指向 /lzcapp/documents 的软链。
+    #
+    # 【2026-10-15 返工 #20394 定稿】上游首次安装不预置任何音乐源：用户在「应用文稿」里放好音乐
+    # 后打开 MA，媒体库「歌曲」是空的，必须先自己到「设置 → 音乐源」手动添加 Filesystem 音乐源，
+    # 评审 #20394 看到的正是这个现象（「添加歌曲文件夹，音乐里面看不到」）。
+    # 修法：首次启动预置一个指向 /media（= 应用文稿）的 Filesystem 音乐源，
+    # 用户把音乐放进应用文稿后由 MA 自动扫描入库，无需任何设置。
+    # 只在 /data/settings.json 不存在（全新安装）时写入种子；升级/重装保留用户已改过的配置。
+    #
+    # 另两条已实测排除的路线（别再试）：
+    #   * 把网盘 bind 进 /media 合并扫描：平台拒绝平台自身挂载作为 bind 源
+    #     （实测 400 `invalid bind source: /lzcapp/media/RemoteFS` 与 `/lzcapp/media`）。
+    #   * 在应用文稿里建软链指向网盘：MA 扫描器对目录项用 `is_dir(follow_symlinks=False)`
+    #     （providers/filesystem_local/helpers.py），子目录软链会被跳过。
+    #   网盘音乐由用户按简介在 MA 里另加一个音乐源（路径 /lzcapp/media/RemoteFS/...）。
+    setup_script: |
+      # 1) 音乐库根目录：/media → 应用文稿（镜像自带一个空的 /media，换成软链；幂等）
+      if [ ! -L /media ]; then
+        if [ -d /media ] && [ -z "$(ls -A /media 2>/dev/null)" ]; then
+          rmdir /media 2>/dev/null
+        fi
+        if [ ! -e /media ] && [ -d /lzcapp/documents ]; then
+          ln -sfn /lzcapp/documents /media
+        fi
+      fi
+      # 2) 首次启动预置默认音乐源（种子含 encryption_key 之外的完整 provider 条目；
+      #    MA 启动后会自己补 server_id / encryption_key 并把 setup_data 加密落盘）
+      if [ ! -f /data/settings.json ] && [ -f /lzcapp/pkg/content/lazycat-assets/settings-seed.json ]; then
+        mkdir -p /data
+        cp /lzcapp/pkg/content/lazycat-assets/settings-seed.json /data/settings.json
+      fi
+      # 3) 自动入库助手：常驻后台，定期触发 music/sync，让新放进「应用文稿 / 网盘」的
+      #    音乐在几分钟内进库（MA 自己的默认调度是每 3 小时一次，等不及）。
+      #    setsid 脱离 setup_script 的进程组，避免脚本退出时把它带走；幂等：已在跑就不重复起。
+      if [ -f /lzcapp/pkg/content/lzc-sync-agent.py ]; then
+        if ! pgrep -f lzc-sync-agent.py >/dev/null 2>&1; then
+          PY=/app/venv/bin/python
+          [ -x "$PY" ] || PY=python3
+          setsid "$PY" /lzcapp/pkg/content/lzc-sync-agent.py >> /data/lzc-sync.log 2>&1 &
+          echo "[lzc-sync] 自动入库助手已启动（间隔 ${LZC_MA_SYNC_INTERVAL:-300}s）" >> /data/lzc-sync.log
+        fi
+      fi
+    binds:
+      # MA 全部持久数据（SQLite、设置、缓存、playlists）
+      - /lzcapp/var/music-assistant:/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -q -O - http://127.0.0.1:8095/info >/dev/null 2>&1 || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
+
+ext_config:
+  # 懒猫网盘挂载资源映射到容器 /lzcapp/media（RemoteFS），可作为音乐库路径
+  enable_media_access: true

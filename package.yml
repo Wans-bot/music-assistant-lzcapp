@@ -1,0 +1,70 @@
+package: cloud.lazycat.app.music-assistant
+version: 2.10.6-7
+name: Music Assistant 音乐中枢
+description: 全家共享的音乐中枢：集中管理本地曲库与在线音乐源，推送到全屋音箱播放
+author: The Music Assistant Team
+license: Apache-2.0
+homepage: https://github.com/music-assistant/server
+min_os_version: 1.6.0
+permissions:
+  required:
+    - net.internet
+    - net.lan
+    - net.host
+    - document.private
+locales:
+  zh-CN:
+    name: Music Assistant 音乐中枢
+    description: 全家共享的音乐中枢：集中管理本地曲库与在线音乐源，推送到 AirPlay、Chromecast、Sonos、DLNA 等各类音箱播放。
+    usage: |
+      Music Assistant（简称 MA）是家庭音乐中枢：把本地曲库和在线音乐源集中管理，推送到全屋音箱播放。
+
+      首次打开会自动完成初始化并登录（免密）。默认管理员账号：admin / MaLzc-8Qx4Rz（商店审核账号，登录后可在「设置 → 用户」中修改；修改后自动登录会失效，改为手动登录）。
+
+      添加本地音乐（放好即自动入库，不需要先手动添加音乐源）：
+      1. 把音乐文件（mp3/flac/m4a 等）放进懒猫「文件管理器 → Music Assistant」的应用文稿目录（等同于本应用的网盘目录）。
+      2. 打开应用内的「歌曲」即可看到：本应用已预置好一个指向应用文稿目录的音乐源，并会自动扫描——默认每 5 分钟一次，
+         实测把一首新曲放进文稿后约 4 分钟即出现在「歌曲」里，全程无需任何手动操作。
+      - 想放别的位置（例如挂载的百度网盘等），在「设置 → 音乐源 → 添加音乐源 → Filesystem (local disk)」里加一个源，
+        路径填 /lzcapp/media/RemoteFS/… 之类即可；加好后同样由自动扫描入库。
+      - 想立刻刷新时，重新打开一次应用页面即可（打开页面会立即触发一次扫描）。
+
+      连接音箱：
+      - 应用以宿主网络方式运行，与音箱处于同一局域网时可自动发现，并推流到 AirPlay、Chromecast、DLNA、Sonos、Sendspin 等设备；设备不在同一网段时可在设置中手动添加。
+      - 商店内的 Home Assistant 应用也可以作为播放端接入。
+
+      在线音乐：
+      - 网易云音乐、QQ 音乐、Spotify、TIDAL、播客与网络电台等需要你在应用内登录自己的服务账号；应用不内置任何账号，也不保管你的密码。
+
+      说明：
+      - 所有数据保存在微服本机（重启、升级不丢失，升级不会改变实例）；音乐文件属于应用文稿，卸载应用默认不删除。
+      - 手机/桌面客户端可以用「微服局域网 IP:8095」直连配对。
+      - 应用需要访问局域网与宿主网络才能发现音箱；为保障安全，请在首次登录后修改默认密码。
+  en-US:
+    name: Music Assistant
+    description: "A self-hosted music hub for the whole home: manage your local library and streaming providers, and play to AirPlay, Chromecast, Sonos and DLNA speakers."
+    usage: |
+      Music Assistant (MA) is a music hub for your home: manage local music and streaming providers in one place, and play to speakers around the house.
+
+      The first time you open the app it completes setup and signs in automatically (no password needed). Default admin account: admin / MaLzc-8Qx4Rz — the review account shown in the store listing. You can change it in Settings → Users; automatic sign-in then falls back to manual login.
+
+      Adding local music (files are indexed automatically, no provider setup needed):
+      1. Put your music files (mp3/flac/m4a etc.) into the app documents folder of "Music Assistant" in the box file manager (this is the same folder as the app's cloud drive entry).
+      2. Open the "Tracks" view inside the app: a music source pointing at that documents folder is preconfigured, and the
+         library is rescanned automatically (every 5 minutes by default; a new track appeared about 4 minutes after it was copied in),
+         with no manual step at all.
+      - To index another location (for example a mounted cloud drive), add one source in Settings → Music Sources → Add provider →
+        Filesystem (local disk) with a path such as /lzcapp/media/RemoteFS/... ; the automatic scan covers it as well.
+      - To refresh immediately, just reopen the app page (opening it triggers a scan right away).
+
+      Connecting speakers:
+      - The app runs on the host network, so speakers on the same LAN are discovered automatically and can be streamed to over AirPlay, Chromecast, DLNA, Sonos, Sendspin and more. Devices on another subnet can be added manually.
+      - The Home Assistant app from the store can also be used as a player.
+
+      Streaming services:
+      - NetEase Cloud Music, QQ Music, Spotify, TIDAL, podcasts and internet radio require you to sign in with your own accounts inside the app. No accounts are bundled and your passwords are not stored elsewhere.
+
+      Notes:
+      - All data is stored on your box and survives restarts and upgrades; the instance does not change on upgrade. Music files are app documents and are not deleted when the app is uninstalled.
+      - Mobile and desktop clients can pair directly via the box LAN address at port 8095.
+      - The app needs LAN and host network access to discover speakers. For safety, change the default password after the first sign-in.
