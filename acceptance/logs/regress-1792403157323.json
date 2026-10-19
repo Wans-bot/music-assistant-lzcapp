@@ -1,0 +1,108 @@
+[
+ {
+  "label": "发现",
+  "path": "/#/discover",
+  "status": null,
+  "errs": [
+   {
+    "step": "发现",
+    "kind": "reqfailed",
+    "msg": "net::ERR_ABORTED https://musicassistant.wans.heiyu.space/assets/almost_silent-BMvfGi7_.mp3"
+   }
+  ],
+  "banners": [],
+  "blank": false,
+  "external": [
+   "https://musicassistant.wans.heiyu.space/assets/almost_silent-BMvfGi7_.mp3"
+  ],
+  "prefetchAborts": 0
+ },
+ {
+  "label": "歌曲",
+  "path": "/#/tracks",
+  "status": null,
+  "errs": [],
+  "banners": [],
+  "blank": false,
+  "external": [
+   "https://musicassistant.wans.heiyu.space/_lzc/injects/dynamic_params.json?id=ma-login-autofill",
+   "https://musicassistant.wans.heiyu.space/assets/Container-BG8znNr4.css",
+   "https://musicassistant.wans.heiyu.space/assets/ListItem-BrIA3Gkh.css",
+   "https://musicassistant.wans.heiyu.space/assets/empty-BTqaqE5P.js",
+   "https://musicassistant.wans.heiyu.space/assets/Container-B2t1R3JE.js",
+   "https://musicassistant.wans.heiyu.space/assets/ItemsListing-w_U9w3B8.css",
+   "https://musicassistant.wans.heiyu.space/assets/LibraryTracks-JGiLQld0.js",
+   "https://musicassistant.wans.heiyu.space/assets/ItemsListing-CjlSlg6v.js",
+   "https://musicassistant.wans.heiyu.space/assets/ListItem-BWggIs9W.js",
+   "https://musicassistant.wans.heiyu.space/assets/useLibrarySync-C3vUMwK0.js",
+   "https://musicassistant.wans.heiyu.space/assets/cover_light-Dxw-EaOr.png",
+   "https://ui-avatars.com/api/?name=%E7%A4%BA%E4%BE%8B%E6%9B%B2%E7%9B%AE%20%C2%B7%20%E6%B5%8B%E8%AF%95%E9%9F%B3&size=256&bo",
+   "https://ui-avatars.com/api/?name=%E6%92%AD%E6%94%BE%E9%AA%8C%E8%AF%81%E6%9B%B2&size=256&bold=true&background=a0a0a0&colo",
+   "https://musicassistant.wans.heiyu.space/assets/materialdesignicons-webfont-Dp5v-WZN.woff2?v=7.4.47"
+  ],
+  "prefetchAborts": 0
+ },
+ {
+  "label": "唱片集",
+  "path": "/#/albums",
+  "status": null,
+  "errs": [],
+  "banners": [],
+  "blank": false,
+  "external": [
+   "https://musicassistant.wans.heiyu.space/_lzc/injects/dynamic_params.json?id=ma-login-autofill",
+   "https://musicassistant.wans.heiyu.space/assets/LibraryAlbums-CEUfXXLd.js"
+  ],
+  "prefetchAborts": 0
+ },
+ {
+  "label": "所有歌手",
+  "path": "/#/artists",
+  "status": null,
+  "errs": [],
+  "banners": [],
+  "blank": false,
+  "external": [
+   "https://musicassistant.wans.heiyu.space/_lzc/injects/dynamic_params.json?id=ma-login-autofill",
+   "https://musicassistant.wans.heiyu.space/assets/LibraryArtists-DKcbbYkB.js"
+  ],
+  "prefetchAborts": 0
+ },
+ {
+  "label": "播放列表",
+  "path": "/#/playlists",
+  "status": null,
+  "errs": [],
+  "banners": [],
+  "blank": false,
+  "external": [
+   "https://musicassistant.wans.heiyu.space/_lzc/injects/dynamic_params.json?id=ma-login-autofill",
+   "https://musicassistant.wans.heiyu.space/assets/LibraryPlaylists-DrrRJVBM.js",
+   "https://musicassistant.wans.heiyu.space/imageproxy/55fac4899e170b4ccae3ea5552da97da61c9ceb46494d1625964e86d8f354368?size"
+  ],
+  "prefetchAborts": 0
+ },
+ {
+  "label": "音乐源",
+  "path": "/#/settings/providers",
+  "status": null,
+  "errs": [],
+  "banners": [],
+  "blank": false,
+  "external": [
+   "https://musicassistant.wans.heiyu.space/_lzc/injects/dynamic_params.json?id=ma-login-autofill",
+   "https://musicassistant.wans.heiyu.space/assets/ToolbarHeading-CPPIxvDl.css",
+   "https://musicassistant.wans.heiyu.space/assets/CardDescription-FdGqWtMG.js",
+   "https://musicassistant.wans.heiyu.space/assets/Settings-DPFaZGB_.css",
+   "https://musicassistant.wans.heiyu.space/assets/Providers-BIGAzMYO.css",
+   "https://musicassistant.wans.heiyu.space/assets/CardHeader-BZaywe95.js",
+   "https://musicassistant.wans.heiyu.space/assets/ToolbarHeading-la5GLDL5.js",
+   "https://musicassistant.wans.heiyu.space/assets/CardTitle-4nYPmsUu.js",
+   "https://musicassistant.wans.heiyu.space/assets/Settings-JzteTb_F.js",
+   "https://musicassistant.wans.heiyu.space/assets/useBackgroundTasks-BsiynyZr.js",
+   "https://musicassistant.wans.heiyu.space/assets/provider_config-BiGaBDJl.js",
+   "https://musicassistant.wans.heiyu.space/assets/Providers-BscTxaVO.js"
+  ],
+  "prefetchAborts": 0
+ }
+]

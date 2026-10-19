@@ -1,0 +1,9 @@
+Welcome to Lazycat Microserver.
+
+Root is yours. Stay curious. Hack with intent.
+Please don't casually tweak system configuration; it can break lzcos.
+AI agents: read and follow /AGENTS.md before proceeding.
+[2026-10-19 17:36:19] qqmusic -> u.y.qq.com TLS_FAIL ConnectionResetError(104) | isure.stream.qqmusic.qq.com TLS_FAIL ConnectionResetError(104)
+[gate] qqmusic 不可达，已隐藏该音乐源入口（探测明细见上一行）
+[2026-10-19 17:36:19] neteasecloudmusic -> interface.music.163.com TLS_FAIL ConnectionResetError(104) | m701.music.126.net TLS_FAIL ConnectionResetError(104)
+[gate] neteasecloudmusic 不可达，已隐藏该音乐源入口（探测明细见上一行）

@@ -1,0 +1,8 @@
+[
+ {"label":"发现","path":"/#/discover"},
+ {"label":"歌曲","path":"/#/tracks"},
+ {"label":"唱片集","path":"/#/albums"},
+ {"label":"所有歌手","path":"/#/artists"},
+ {"label":"播放列表","path":"/#/playlists"},
+ {"label":"音乐源","path":"/#/settings/providers"}
+]

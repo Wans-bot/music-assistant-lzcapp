@@ -14,6 +14,20 @@
         "content_type": "music",
         "path": "/media"
       }
+    },
+    "filesystem_local--lzcdemo": {
+      "values": {},
+      "type": "music",
+      "domain": "filesystem_local",
+      "instance_id": "filesystem_local--lzcdemo",
+      "enabled": true,
+      "name": "示例曲目（懒猫）",
+      "default_name": "Filesystem (local disk) [demo]",
+      "last_error": null,
+      "setup_data": {
+        "content_type": "music",
+        "path": "/data/demo-music"
+      }
     }
   }
 }

@@ -1,0 +1,40 @@
+{
+ "ok": true,
+ "path": "rpc-player_queues/play_media（UI 点击未起播）",
+ "click": "play-button-not-found",
+ "progressSamples": [
+  {
+   "state": "playing",
+   "current": "懒猫微服 - 示例曲目 · 测试音",
+   "elapsed": 2.32
+  },
+  {
+   "state": "playing",
+   "current": "懒猫微服 - 示例曲目 · 测试音",
+   "elapsed": 5.32
+  },
+  {
+   "state": "playing",
+   "current": "懒猫微服 - 示例曲目 · 测试音",
+   "elapsed": 8.32
+  },
+  {
+   "state": "playing",
+   "current": "懒猫微服 - 示例曲目 · 测试音",
+   "elapsed": 11.32
+  }
+ ],
+ "elapsedDeltas": [
+  3,
+  3,
+  3
+ ],
+ "monotonic": true,
+ "webAudio": {
+  "buffers": 625,
+  "samples": 600000,
+  "secondsScheduled": 13.61
+ },
+ "errors": [],
+ "shot": "/tmp/ma-acc/shots/pc05__playback.png"
+}

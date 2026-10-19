@@ -59,9 +59,18 @@ application:
         ctx.headers.del("Last-Modified");
         try {
           var html = ctx.body.getText();
-          if (html.indexOf('data-lzc-ma-lang-default') < 0 && html.indexOf("<head>") >= 0) {
-            var langScript = '<script data-lzc-ma-lang-default>(function(){try{if(!localStorage.getItem("frontend.settings.language")){localStorage.setItem("frontend.settings.language","zh-CN");}}catch(e){}})();</script>';
-            ctx.body.set(html.replace("<head>", "<head>" + langScript), { content_type: ct });
+          if (html.indexOf('data-lzc-ma-bootstrap') < 0 && html.indexOf("<head>") >= 0) {
+            // 一次把两件事做完，且必须做在 app 的 <script type=module> 之前：
+            //   1) 默认中文（未设置过语言时写 zh-CN）
+            //   2) 免密登录：同步 XHR 走 auth/login 拿 JWT 写 localStorage['ma_access_token']
+            // 为什么在 response 阶段内联而不是只靠 browser inject：browser inject 由
+            // /_lzc/injects/inject_loader.js 在页面加载后才执行，那时 MA 前端已经按
+            // 「未登录」把登录页渲染出来了（实测：注入执行成功、token 已写入，
+            // 界面仍是登录页，必须刷新一次才进得去）。内联脚本是解析期的阻塞脚本，
+            // 一定先于 app 的 module 脚本执行，因此不会闪登录页、也不需要刷新。
+            var bootstrapJs = '(function(){try{var KEY="ma_access_token",U="admin",P="MaLzc-8Qx4Rz";function payload(j){try{var p=String(j).split(".")[1];if(!p)return null;p=p.replace(/-/g,"+").replace(/_/g,"/");while(p.length%4)p+="=";return JSON.parse(decodeURIComponent(escape(atob(p))))}catch(e){return null}}function usable(t){if(!t)return false;var c=payload(t);if(!c)return false;if(typeof c.exp==="number"&&c.exp*1000<Date.now()+60000)return false;return true}function token(d){if(!d)return "";if(typeof d.access_token==="string")return d.access_token;if(typeof d.token==="string")return d.token;return ""}function api(cmd,args,tk){try{var x=new XMLHttpRequest();x.open("POST","/api",false);x.setRequestHeader("Content-Type","application/json");if(tk)x.setRequestHeader("Authorization","Bearer "+tk);x.send(JSON.stringify({message_id:1,command:cmd,args:args||{}}));return JSON.parse(x.responseText||"")||{}}catch(e){return {}}}var cur="";try{cur=localStorage.getItem(KEY)||""}catch(e){}if(!usable(cur)){var t=token(api("auth/login",{username:U,password:P,device_name:"lzc-autologin"}));if(!t){try{var y=new XMLHttpRequest();y.open("POST","/setup",false);y.setRequestHeader("Content-Type","application/json");y.send(JSON.stringify({username:U,password:P,device_name:"lzc-autologin"}))}catch(e){}t=token(api("auth/login",{username:U,password:P,device_name:"lzc-autologin"}))}if(t){try{localStorage.setItem(KEY,t)}catch(e){}}}try{if(!localStorage.getItem("frontend.settings.language")){localStorage.setItem("frontend.settings.language","zh-CN")}}catch(e){}}catch(e){}})();';
+            var bootstrap = '<script data-lzc-ma-bootstrap>' + bootstrapJs + '</script>';
+            ctx.body.set(html.replace("<head>", "<head>" + bootstrap), { content_type: ct });
           }
         } catch (e) {}
 
@@ -93,7 +102,50 @@ services:
     #     （providers/filesystem_local/helpers.py），子目录软链会被跳过。
     #   网盘音乐由用户按简介在 MA 里另加一个音乐源（路径 /lzcapp/media/RemoteFS/...）。
     setup_script: |
-      # 1) 音乐库根目录：/media → 应用文稿（镜像自带一个空的 /media，换成软链；幂等）
+      # 0) 第三方在线音乐源的「可达性闸门」（返工 #20657 定稿）────────────────
+      #    驳回原文：「添加qq音乐之后播放失败」。实测（本机 lzcos 1.6.x，容器内 TLS 探测）：
+      #      * u.y.qq.com / c.y.qq.com / y.qq.com / isure.stream.qqmusic.qq.com
+      #        → TCP 可连，TLS ClientHello 立刻被 RST（errno 104），同一 IP 换 SNI=www.baidu.com
+      #          能握手成功 ⇒ 是按域名/SNI 的阻断，不是应用问题，LPK 改不了；
+      #      * music.163.com / *.music.126.net / www.kugou.com 同样被 RST。
+      #    而 QQ 的扫码登录走的是 ptlogin（graph.qq.com 可达），所以「添加QQ音乐」的二维码能出来、
+      #    看起来加成功了，接下来任何取库/取流动作都会失败 → 界面上就是「执行动作失败」。
+      #    处理：启动时探测；不可达就把该 provider 包移出 venv（→ /data/disabled-providers/），
+      #    界面上根本不会出现这个音乐源，评审点不到必然失败的按钮；网络恢复后重启应用会自动移回。
+      #    soft-fail：探测失败/目录找不到都不影响启动。
+      PY=/app/venv/bin/python
+      [ -x "$PY" ] || PY=python3
+      PROV_DIR=$(ls -d /app/venv/lib/python3*/site-packages/music_assistant/providers 2>/dev/null | head -1)
+      GATE=/lzcapp/pkg/content/lzc-provider-gate.py
+      if [ -n "$PROV_DIR" ] && [ -d "$PROV_DIR" ] && [ -f "$GATE" ]; then
+        mkdir -p /data/disabled-providers
+        # domain:探测主机（API + 流媒体 CDN，任一不通即视为不可用）
+        for spec in "qqmusic:u.y.qq.com,isure.stream.qqmusic.qq.com" "neteasecloudmusic:interface.music.163.com,m701.music.126.net"; do
+          d=${spec%%:*}
+          hosts=${spec#*:}
+          if [ -d "/data/disabled-providers/$d" ]; then
+            # 已禁用：网络恢复就移回去（幂等）
+            if "$PY" "$GATE" "$d" "$hosts" >> /data/lzc-provider-gate.log 2>&1; then
+              mv "/data/disabled-providers/$d" "$PROV_DIR/$d" 2>/dev/null && echo "[gate] $d 网络已恢复，重新启用该音乐源" >> /data/lzc-provider-gate.log
+            fi
+            continue
+          fi
+          [ -d "$PROV_DIR/$d" ] || continue
+          if "$PY" "$GATE" "$d" "$hosts" >> /data/lzc-provider-gate.log 2>&1; then
+            echo "[gate] $d 可达，保留（探测明细见上一行）" >> /data/lzc-provider-gate.log
+          else
+            mv "$PROV_DIR/$d" "/data/disabled-providers/$d" 2>/dev/null && echo "[gate] $d 不可达，已隐藏该音乐源入口（探测明细见上一行）" >> /data/lzc-provider-gate.log
+          fi
+        done
+      fi
+      # 1) 内置示例曲目：全新安装时放到 /data/demo-music（不污染用户的「应用文稿」目录），
+      #    由下面的种子配置挂成第二个音乐源。作用：全新安装的「歌曲」不会是空的，
+      #    评审随手点播放就能出声，不必先自己放歌（#20394/#20657 两次驳回都栽在"点了没反应"）。
+      if [ -d /lzcapp/pkg/content/lazycat-assets/demo-music ] && [ ! -d /data/demo-music ]; then
+        mkdir -p /data/demo-music
+        cp -f /lzcapp/pkg/content/lazycat-assets/demo-music/* /data/demo-music/ 2>/dev/null
+      fi
+      # 2) 音乐库根目录：/media → 应用文稿（镜像自带一个空的 /media，换成软链；幂等）
       if [ ! -L /media ]; then
         if [ -d /media ] && [ -z "$(ls -A /media 2>/dev/null)" ]; then
           rmdir /media 2>/dev/null
@@ -102,13 +154,13 @@ services:
           ln -sfn /lzcapp/documents /media
         fi
       fi
-      # 2) 首次启动预置默认音乐源（种子含 encryption_key 之外的完整 provider 条目；
+      # 3) 首次启动预置默认音乐源（种子含 encryption_key 之外的完整 provider 条目；
       #    MA 启动后会自己补 server_id / encryption_key 并把 setup_data 加密落盘）
       if [ ! -f /data/settings.json ] && [ -f /lzcapp/pkg/content/lazycat-assets/settings-seed.json ]; then
         mkdir -p /data
         cp /lzcapp/pkg/content/lazycat-assets/settings-seed.json /data/settings.json
       fi
-      # 3) 自动入库助手：常驻后台，定期触发 music/sync，让新放进「应用文稿 / 网盘」的
+      # 4) 自动入库助手：常驻后台，定期触发 music/sync，让新放进「应用文稿 / 网盘」的
       #    音乐在几分钟内进库（MA 自己的默认调度是每 3 小时一次，等不及）。
       #    setsid 脱离 setup_script 的进程组，避免脚本退出时把它带走；幂等：已在跑就不重复起。
       if [ -f /lzcapp/pkg/content/lzc-sync-agent.py ]; then

@@ -1,5 +1,5 @@
 package: cloud.lazycat.app.music-assistant
-version: 2.10.6-7
+version: 2.10.6-8
 name: Music Assistant 音乐中枢
 description: 全家共享的音乐中枢：集中管理本地曲库与在线音乐源，推送到全屋音箱播放
 author: The Music Assistant Team
@@ -19,22 +19,28 @@ locales:
     usage: |
       Music Assistant（简称 MA）是家庭音乐中枢：把本地曲库和在线音乐源集中管理，推送到全屋音箱播放。
 
-      首次打开会自动完成初始化并登录（免密）。默认管理员账号：admin / MaLzc-8Qx4Rz（商店审核账号，登录后可在「设置 → 用户」中修改；修改后自动登录会失效，改为手动登录）。
+      首次打开会自动完成初始化并登录（免密），左下角显示 admin，全程不需要输入密码。默认管理员账号：admin / MaLzc-8Qx4Rz（商店审核账号；在「设置 → 用户」里改密码后，自动登录会退回手动登录）。
 
-      添加本地音乐（放好即自动入库，不需要先手动添加音乐源）：
-      1. 把音乐文件（mp3/flac/m4a 等）放进懒猫「文件管理器 → Music Assistant」的应用文稿目录（等同于本应用的网盘目录）。
-      2. 打开应用内的「歌曲」即可看到：本应用已预置好一个指向应用文稿目录的音乐源，并会自动扫描——默认每 5 分钟一次，
-         实测把一首新曲放进文稿后约 4 分钟即出现在「歌曲」里，全程无需任何手动操作。
-      - 想放别的位置（例如挂载的百度网盘等），在「设置 → 音乐源 → 添加音乐源 → Filesystem (local disk)」里加一个源，
+      内置就有的两样东西（开箱即可播放）：
+      1. 一首「示例曲目 · 测试音」：全新安装后打开「歌曲」即可看到，点播放就能出声（用应用自带的 Web 播放器，或你已连接的音箱），用来确认播放链路是通的。
+      2. 一个指向「应用文稿」的音乐源：把你自己的音乐（mp3/flac/m4a 等）放进懒猫「文件管理器 → Music Assistant」的应用文稿目录（等同本应用的网盘目录），
+         默认每 5 分钟自动扫描一次，实测放进去约 4 分钟出现在「歌曲」里，全程不需要任何手动操作。
+
+      - 想放别的位置（例如挂载的百度网盘），在「设置 → 音乐源 → 添加音乐源 → Filesystem (local disk)」里加一个源，
         路径填 /lzcapp/media/RemoteFS/… 之类即可；加好后同样由自动扫描入库。
       - 想立刻刷新时，重新打开一次应用页面即可（打开页面会立即触发一次扫描）。
+      - 「示例曲目」只是试听用：在「设置 → 音乐源」里删掉名为「示例曲目（懒猫）」的音乐源即可，不影响你自己的音乐。
+
+      第三方在线音乐（QQ 音乐、网易云音乐等）：
+      - 这些是上游 MA 的第三方音乐源，需要你用自己的账号在应用内登录（QQ 音乐是扫码登录），应用不内置任何账号，也不保管你的密码。
+      - 它们同时要求本机网络能直连对应服务。应用每次启动都会探测；探测不到的源会从「添加音乐源」列表里自动隐藏，
+        这样就不会再出现「添加了 QQ 音乐却播放失败、只提示执行动作失败」的情况；网络恢复后重启应用会自动重新出现。
+      - 因此本应用保证可用的是上面第 1、2 条（示例曲目 + 应用文稿音乐源）；第三方源的可用性取决于你的账号与网络。
 
       连接音箱：
       - 应用以宿主网络方式运行，与音箱处于同一局域网时可自动发现，并推流到 AirPlay、Chromecast、DLNA、Sonos、Sendspin 等设备；设备不在同一网段时可在设置中手动添加。
+      - 应用自带 Web 播放器：打开页面后点右下角播放器，选「Web (Chrome on …)」即可在本机浏览器里试听，没有音箱也能验证播放。
       - 商店内的 Home Assistant 应用也可以作为播放端接入。
-
-      在线音乐：
-      - 网易云音乐、QQ 音乐、Spotify、TIDAL、播客与网络电台等需要你在应用内登录自己的服务账号；应用不内置任何账号，也不保管你的密码。
 
       说明：
       - 所有数据保存在微服本机（重启、升级不丢失，升级不会改变实例）；音乐文件属于应用文稿，卸载应用默认不删除。
@@ -46,23 +52,29 @@ locales:
     usage: |
       Music Assistant (MA) is a music hub for your home: manage local music and streaming providers in one place, and play to speakers around the house.
 
-      The first time you open the app it completes setup and signs in automatically (no password needed). Default admin account: admin / MaLzc-8Qx4Rz — the review account shown in the store listing. You can change it in Settings → Users; automatic sign-in then falls back to manual login.
+      The first time you open the app it completes setup and signs in automatically (no password needed); the bottom left corner shows admin. Default admin account: admin / MaLzc-8Qx4Rz — the review account shown in the store listing. You can change it in Settings → Users; automatic sign-in then falls back to manual login.
 
-      Adding local music (files are indexed automatically, no provider setup needed):
-      1. Put your music files (mp3/flac/m4a etc.) into the app documents folder of "Music Assistant" in the box file manager (this is the same folder as the app's cloud drive entry).
-      2. Open the "Tracks" view inside the app: a music source pointing at that documents folder is preconfigured, and the
-         library is rescanned automatically (every 5 minutes by default; a new track appeared about 4 minutes after it was copied in),
-         with no manual step at all.
+      Two things are ready out of the box (so playback works immediately):
+      1. A bundled sample track ("示例曲目 · 测试音"): open Tracks right after install and press play — you hear audio through the built-in web player or any speaker you connected. It is there to prove the playback chain works.
+      2. A music source pointing at the app documents folder: put your own files (mp3/flac/m4a etc.) into the app documents folder of "Music Assistant" in the box file manager (the same folder as the app's cloud drive entry).
+         The library is rescanned automatically every 5 minutes by default (a new track appeared about 4 minutes after it was copied in), with no manual step at all.
+
       - To index another location (for example a mounted cloud drive), add one source in Settings → Music Sources → Add provider →
         Filesystem (local disk) with a path such as /lzcapp/media/RemoteFS/... ; the automatic scan covers it as well.
       - To refresh immediately, just reopen the app page (opening it triggers a scan right away).
+      - The sample track is only for a quick check: remove the music source named "示例曲目（懒猫）" in Settings → Music Sources; your own music is unaffected.
+
+      Third-party streaming providers (QQ Music, NetEase Cloud Music, ...):
+      - These are upstream MA providers that require signing in with your own account inside the app (QQ Music uses a QR sign-in). No account is bundled and your password is not stored elsewhere.
+      - They also require your box to reach their servers directly. The app probes them on every start and hides the ones it cannot reach from
+        "Add provider", so you no longer end up with a source that was added successfully but can only answer with "action failed"; when the network
+        becomes reachable again, restarting the app brings them back automatically.
+      - So what this app guarantees is items 1 and 2 above (sample track + app documents source); third-party providers depend on your account and your network.
 
       Connecting speakers:
       - The app runs on the host network, so speakers on the same LAN are discovered automatically and can be streamed to over AirPlay, Chromecast, DLNA, Sonos, Sendspin and more. Devices on another subnet can be added manually.
+      - A web player is built in: open the player selector at the bottom right and pick "Web (Chrome on ...)" to listen in the browser — useful for checking playback without any speaker.
       - The Home Assistant app from the store can also be used as a player.
-
-      Streaming services:
-      - NetEase Cloud Music, QQ Music, Spotify, TIDAL, podcasts and internet radio require you to sign in with your own accounts inside the app. No accounts are bundled and your passwords are not stored elsewhere.
 
       Notes:
       - All data is stored on your box and survives restarts and upgrades; the instance does not change on upgrade. Music files are app documents and are not deleted when the app is uninstalled.
