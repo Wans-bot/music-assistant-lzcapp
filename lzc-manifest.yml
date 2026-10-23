@@ -73,11 +73,11 @@ application:
             ctx.body.set(html.replace("<head>", "<head>" + bootstrap), { content_type: ct });
           }
         } catch (e) {}
-
 services:
   # ── Music Assistant 服务端（单容器；数据在 /data；官方镜像中转）────────
   music-assistant:
-    image: registry.lazycat.cloud/wans/music-assistant/server:cf9ebd30fcec0dd5
+    # upstream: ghcr.io/music-assistant/server:2.10.7
+    image: registry.lazycat.cloud/wans/music-assistant/server:8eb790a700f15499
     network_mode: host
     environment:
       TZ: Asia/Shanghai
@@ -182,7 +182,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 120s
-
 ext_config:
   # 懒猫网盘挂载资源映射到容器 /lzcapp/media（RemoteFS），可作为音乐库路径
   enable_media_access: true

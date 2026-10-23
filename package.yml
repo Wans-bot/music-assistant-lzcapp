@@ -1,5 +1,5 @@
 package: cloud.lazycat.app.music-assistant
-version: 2.10.6-8
+version: 2.10.7
 name: Music Assistant 音乐中枢
 description: 全家共享的音乐中枢：集中管理本地曲库与在线音乐源，推送到全屋音箱播放
 author: The Music Assistant Team
