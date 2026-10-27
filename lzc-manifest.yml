@@ -76,8 +76,8 @@ application:
 services:
   # ── Music Assistant 服务端（单容器；数据在 /data；官方镜像中转）────────
   music-assistant:
-    # upstream: ghcr.io/music-assistant/server:2.10.7
-    image: registry.lazycat.cloud/wans/music-assistant/server:8eb790a700f15499
+    # upstream: ghcr.io/music-assistant/server:2.10.8
+    image: registry.lazycat.cloud/wans/music-assistant/server:2dde8ae8f429d9a5
     network_mode: host
     environment:
       TZ: Asia/Shanghai
