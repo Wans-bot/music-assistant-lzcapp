@@ -27,6 +27,14 @@ images:
     delivery:
       mode: lazycat
 
+release:
+  use_github_release_notes: true
+  changelog_template: |
+    同步上游最新版本 {{.Version}}。
+    {{if .ReleaseNotes}}
+    {{.ReleaseNotes}}
+    {{end}}
+
 stores:
   official:
     enabled: true
